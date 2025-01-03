@@ -1,0 +1,63 @@
+MAIN: CALL VECT1 ; Allocating Vector1 [2H, 1H, 5H, 6H, 2H, 1H] to addresses 0x2010-0x2015
+MVI A, 06H ; Setting Length of sorting to be 6
+LXI H, 2010H ; Setting address of first element
+CALL BUBLSORT ; Call of implementend sorting routine
+CALL VECT2 ; Same thing, but with another vector
+MVI A, 05H
+LXI H, 3010H
+CALL BUBLSORT
+HLT ; End of Main
+
+VECT1: MVI A, 02H ; Allocating Vector1 [2H, 1H, 5H, 6H, 2H, 1H] to addresses 0x2010-0x2015
+STA 2010H
+MVI A, 01H
+STA 2011H
+MVI A, 05H
+STA 2012H
+MVI A, 06H
+STA 2013H
+MVI A, 02H
+STA 2014H
+MVI A, 01H
+STA 2015H
+RET
+HLT
+
+VECT2: MVI A, 0FFH ; Allocating Vector2 [FFH (255), 0H, 15H (21), 60H (96), 2H] to addresses 0x3010-0x3014
+STA 3010H
+MVI A, 00H
+STA 3011H
+MVI A, 15H
+STA 3012H
+MVI A, 60H
+STA 3013H
+MVI A, 02H
+STA 3014H
+RET
+HLT
+
+BUBLSORT: SHLD 2000H ; Saving address of first element of vector
+STA 2002H ; Saving lenght of vector
+OUTERLP: LXI H, 2002H ; Start of outerloop, fetching length from memory
+MOV C, M
+DCR C ; Length of vector - 1
+MVI D, 00H ; SwappedFlag = False
+LHLD 2000H ; Fetching address of first element
+INNERLP: MOV A, M ; Iteration in vector, getting current value into Accumulator
+INX H ; Incrementing address to get address of next value
+CMP M ; Comparison between Current and Next values
+JC NEXTBYTE ; Jump if Current less or equal to Next
+JZ NEXTBYTE
+MOV B, M ; Swap of two elements
+MOV M, A
+DCX H
+MOV M, B
+INX H
+MVI D, 01H ; Setting SwappedFlag to True
+NEXTBYTE: DCR C ; Decrement "Comparisons Left"
+JNZ INNERLP ; If some comparisons left, start innerloop again
+MOV A, D ; Moving SwappedFlag to A, to do arithmetics
+CPI 01H ; Comparison D to 1
+JZ OUTERLP ; If D is 1, then go to start of outer loop, else stop. 
+RET
+HLT
